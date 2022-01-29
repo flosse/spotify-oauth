@@ -1,7 +1,7 @@
 //! Error Type for the API.
 
 use snafu::Snafu;
-use std::{env, error};
+use std::env;
 
 /// Generic Result for the Library
 pub type SpotifyResult<T, E = SpotifyError> = Result<T, E>;
@@ -24,8 +24,11 @@ pub enum SpotifyError {
     #[snafu(display("Callback URL parsing failure: {}", context))]
     CallbackFailure { context: &'static str },
 
-    #[snafu(display("Surf http failure: {}", source))]
+    #[snafu(display("Surf http failure: {}", context))]
     SurfError {
-        source: Box<dyn error::Error + Send + Sync>,
+        // NOTE:
+        // 'source: Box<dyn error::Error + Send + Sync>'
+        // does not work with surf v2.x anymore.
+        context: String,
     },
 }

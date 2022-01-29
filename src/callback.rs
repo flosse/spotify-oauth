@@ -162,11 +162,13 @@ impl SpotifyCallback {
 
         // POST the request.
         let mut response = surf::post(SPOTIFY_TOKEN_URL)
-            .set_header("Authorization", format!("Basic {}", auth_value))
-            .body_form(&payload)
-            .unwrap()
+            .header("Authorization", format!("Basic {}", auth_value))
+            .body(surf::Body::from_form(&payload).unwrap())
+            .send()
             .await
-            .context(SurfError)?;
+            .map_err(|err| SpotifyError::SurfError {
+                context: format!("{err:?}"),
+            })?;
 
         // Read the response body.
         let buf = response.body_string().await.unwrap();

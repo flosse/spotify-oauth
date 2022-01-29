@@ -25,8 +25,11 @@ pub fn datetime_to_timestamp(elapsed: u32) -> i64 {
 /// let timestamp = generate_random_string(20);
 /// ```
 pub fn generate_random_string(length: usize) -> String {
-    rand::thread_rng()
-        .sample_iter(&rand::distributions::Alphanumeric)
-        .take(length)
-        .collect()
+    String::from_utf8_lossy(
+        &rand::thread_rng()
+            .sample_iter(&rand::distributions::Alphanumeric)
+            .take(length)
+            .collect::<Vec<_>>(),
+    )
+    .to_string()
 }
