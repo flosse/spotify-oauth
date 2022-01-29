@@ -2,7 +2,7 @@
 name = "spotify-oauth"
 version = "0.3.0"
 authors = ["FrictionlessPortals <8077147+FrictionlessPortals@users.noreply.github.com>"]
-edition = "2018"
+edition = "2021"
 license = "MIT"
 readme = "README.md"
 description = "An implementation of the Spotify Authorization Code Flow in Rust"
