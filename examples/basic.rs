@@ -1,10 +1,33 @@
-use spotify_oauth::{SpotifyAuth, SpotifyCallback, SpotifyScope};
-use std::{error::Error, io::stdin, str::FromStr};
+use dotenv::dotenv;
+use spotify_oauth::{generate_random_string, SpotifyAuth, SpotifyCallback, SpotifyScope};
+use std::{env, error::Error, io::stdin, str::FromStr};
+use url::Url;
 
 #[async_std::main]
 async fn main() -> Result<(), Box<dyn Error + Send + Sync + 'static>> {
-    // Setup Spotify Auth URL
-    let auth = SpotifyAuth::new_from_env("code".into(), vec![SpotifyScope::Streaming], false);
+    // Load local .env file.
+    dotenv().ok();
+
+    // Setup Spotify Auth
+    let response_type = "code".to_string();
+    let scope = vec![SpotifyScope::Streaming];
+    let show_dialog = false;
+    let client_id = env::var("SPOTIFY_CLIENT_ID").unwrap();
+    let client_secret = env::var("SPOTIFY_CLIENT_SECRET").unwrap();
+    let redirect_uri = Url::parse(&env::var("SPOTIFY_REDIRECT_URI").unwrap()).unwrap();
+
+    // Create a state value of length 20
+    let state = generate_random_string(20);
+
+    let auth = SpotifyAuth {
+        client_id,
+        client_secret,
+        response_type,
+        redirect_uri,
+        state,
+        scope,
+        show_dialog,
+    };
     let auth_url = auth.authorize_url()?;
 
     // Open the auth URL in the default browser of the user.

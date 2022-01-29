@@ -7,12 +7,21 @@
 //! ```no_run
 //! use std::{io::stdin, str::FromStr, error::Error};
 //! use spotify_oauth::{SpotifyAuth, SpotifyCallback, SpotifyScope};
+//! use url::Url;
 //!
 //! #[async_std::main]
 //! async fn main() -> Result<(), Box<dyn Error + Send + Sync + 'static>> {
 //!
 //!     // Setup Spotify Auth URL
-//!     let auth = SpotifyAuth::new_from_env("code".into(), vec![SpotifyScope::Streaming], false);
+//!     let auth = SpotifyAuth {
+//!            response_type : "code".to_string(),
+//!            scope : vec![SpotifyScope::Streaming],
+//!            show_dialog : false,
+//!            client_id : "YOUR_SPOTIFY_CLIENT_ID".to_string(),
+//!            client_secret : "YOUR_SPOTIFY_CLIENT_SECRET".to_string(),
+//!            redirect_uri : Url::parse("http://localhost:8080/callback").unwrap(),
+//!            state : "-use-a-radom-string-".to_string()
+//!        };
 //!     let auth_url = auth.authorize_url()?;
 //!
 //!     // Open the auth URL in the default browser of the user.

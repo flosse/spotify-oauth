@@ -1,22 +1,11 @@
-use crate::{
-    generate_random_string, EnvError, SpotifyResult, SpotifyScope, UrlError, SPOTIFY_AUTH_URL,
-};
-use dotenv::dotenv;
+use crate::{generate_random_string, SpotifyResult, SpotifyScope, UrlError, SPOTIFY_AUTH_URL};
 use snafu::ResultExt;
-use std::{env, string::ToString};
+use std::string::ToString;
 use url::Url;
 
 /// Spotify Authentication
 ///
 /// This struct follows the parameters given at [this](https://developer.spotify.com/documentation/general/guides/authorization-guide/ "Spotify Auth Documentation") link.
-///
-/// # Example
-///
-/// ```no_run
-/// # use spotify_oauth::{SpotifyAuth, SpotifyScope};
-/// // Create a new spotify auth object with the scope "Streaming" using the ``new_from_env`` function.
-/// // This object can then be converted into the auth url needed to gain a callback for the token.
-/// let auth = SpotifyAuth::new_from_env("code".into(), vec![SpotifyScope::Streaming], false);
 /// ```
 pub struct SpotifyAuth {
     /// The Spotify Application Client ID
@@ -33,32 +22,6 @@ pub struct SpotifyAuth {
     pub scope: Vec<SpotifyScope>,
     /// Whether or not to force the user to approve the app again if they’ve already done so.
     pub show_dialog: bool,
-}
-
-/// Implementation of Default for SpotifyAuth.
-///
-/// If ``CLIENT_ID`` is not found in the ``.env`` in the project directory it will default to ``INVALID_ID``.
-/// If ``REDIRECT_ID`` is not found in the ``.env`` in the project directory it will default to ``http://localhost:8000/callback``.
-///
-/// This implementation automatically generates a state value of length 20 using a random string generator.
-///
-impl Default for SpotifyAuth {
-    fn default() -> Self {
-        // Load local .env file.
-        dotenv().ok();
-
-        Self {
-            client_id: env::var("SPOTIFY_CLIENT_ID").context(EnvError).unwrap(),
-            client_secret: env::var("SPOTIFY_CLIENT_SECRET").context(EnvError).unwrap(),
-            response_type: "code".to_owned(),
-            redirect_uri: Url::parse(&env::var("REDIRECT_URI").context(EnvError).unwrap())
-                .context(UrlError)
-                .unwrap(),
-            state: generate_random_string(20),
-            scope: vec![],
-            show_dialog: false,
-        }
-    }
 }
 
 /// Conversion and helper functions for SpotifyAuth.
@@ -91,41 +54,6 @@ impl SpotifyAuth {
             client_secret,
             response_type,
             redirect_uri: Url::parse(&redirect_uri).context(UrlError).unwrap(),
-            state: generate_random_string(20),
-            scope,
-            show_dialog,
-        }
-    }
-
-    /// Generate a new SpotifyAuth structure from values in the environment.
-    ///
-    /// This function loads ``SPOTIFY_CLIENT_ID`` and ``SPOTIFY_REDIRECT_ID`` from the environment.
-    ///
-    /// This function also automatically generates a state value of length 20 using a random string generator.
-    ///
-    /// # Example
-    ///
-    /// ```no_run
-    /// # use spotify_oauth::{SpotifyAuth, SpotifyScope};
-    /// // SpotifyAuth with the scope "Streaming".
-    /// let auth = SpotifyAuth::new_from_env("code".into(), vec![SpotifyScope::Streaming], false);
-    /// # assert_eq!(auth.scope_into_string(), "streaming");
-    /// ```
-    pub fn new_from_env(
-        response_type: String,
-        scope: Vec<SpotifyScope>,
-        show_dialog: bool,
-    ) -> Self {
-        // Load local .env file.
-        dotenv().ok();
-
-        Self {
-            client_id: env::var("SPOTIFY_CLIENT_ID").context(EnvError).unwrap(),
-            client_secret: env::var("SPOTIFY_CLIENT_SECRET").context(EnvError).unwrap(),
-            response_type,
-            redirect_uri: Url::parse(&env::var("SPOTIFY_REDIRECT_URI").context(EnvError).unwrap())
-                .context(UrlError)
-                .unwrap(),
             state: generate_random_string(20),
             scope,
             show_dialog,

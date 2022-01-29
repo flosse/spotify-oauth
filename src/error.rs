@@ -1,7 +1,6 @@
 //! Error Type for the API.
 
 use snafu::Snafu;
-use std::env;
 
 /// Generic Result for the Library
 pub type SpotifyResult<T, E = SpotifyError> = Result<T, E>;
@@ -9,9 +8,6 @@ pub type SpotifyResult<T, E = SpotifyError> = Result<T, E>;
 #[derive(Debug, Snafu)]
 #[snafu(visibility = "pub(crate)")]
 pub enum SpotifyError {
-    #[snafu(display("Unable to read environment variable: {}", source))]
-    EnvError { source: env::VarError },
-
     #[snafu(display("Unable to parse JSON: {}", source))]
     SerdeError { source: serde_json::Error },
 
