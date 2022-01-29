@@ -85,14 +85,14 @@ impl FromStr for SpotifyCallback {
 
         if response.0 == "code" {
             return Ok(Self {
-                code: Some(response.to_owned().1),
+                code: Some(response.1),
                 error: None,
                 state: state.1,
             });
         } else if response.0 == "error" {
             return Ok(Self {
                 code: None,
-                error: Some(response.to_owned().1),
+                error: Some(response.1),
                 state: state.1,
             });
         }
