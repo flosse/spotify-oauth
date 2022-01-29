@@ -1,5 +1,7 @@
 use dotenv::dotenv;
-use spotify_oauth::{generate_random_string, SpotifyAuth, SpotifyCallback, SpotifyScope};
+use spotify_oauth::{
+    convert_callback_into_token, generate_random_string, SpotifyAuth, SpotifyCallback, SpotifyScope,
+};
 use std::{env, error::Error, io::stdin, str::FromStr};
 use url::Url;
 
@@ -37,10 +39,15 @@ async fn main() -> Result<(), Box<dyn Error + Send + Sync + 'static>> {
     let mut buffer = String::new();
     stdin().read_line(&mut buffer)?;
 
+    let callback = SpotifyCallback::from_str(buffer.trim())?;
     // Convert the given callback URL into a token.
-    let token = SpotifyCallback::from_str(buffer.trim())?
-        .convert_into_token(auth.client_id, auth.client_secret, auth.redirect_uri)
-        .await?;
+    let token = convert_callback_into_token(
+        callback,
+        auth.client_id,
+        auth.client_secret,
+        auth.redirect_uri,
+    )
+    .await?;
 
     println!("Token: {:#?}", token);
 

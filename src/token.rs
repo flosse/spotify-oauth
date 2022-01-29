@@ -12,7 +12,7 @@ use std::str::FromStr;
 /// # Example
 ///
 /// ```no_run
-/// # use spotify_oauth::{SpotifyAuth, SpotifyScope, SpotifyCallback};
+/// # use spotify_oauth::{convert_callback_into_token, SpotifyAuth, SpotifyScope, SpotifyCallback};
 /// # use std::str::FromStr;
 /// # #[async_std::main]
 /// # async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>> {
@@ -20,8 +20,8 @@ use std::str::FromStr;
 /// let auth = SpotifyAuth::new("00000000000".into(), "secret".into(), "code".into(), "http://localhost:8000/callback".into(), vec![SpotifyScope::Streaming], false);   
 ///
 /// // Create a new Spotify token object using the callback object given by the authorization process.
-/// let token = SpotifyCallback::from_str("https://example.com/callback?code=NApCCgBkWtQ&state=test").unwrap()
-///     .convert_into_token(auth.client_id, auth.client_secret, auth.redirect_uri).await.unwrap();
+/// let callback = SpotifyCallback::from_str("https://example.com/callback?code=NApCCgBkWtQ&state=test").unwrap();
+/// convert_callback_into_token(callback, auth.client_id, auth.client_secret, auth.redirect_uri).await.unwrap();
 /// # Ok(()) }
 /// ```
 #[derive(Serialize, Deserialize, Debug, PartialEq)]

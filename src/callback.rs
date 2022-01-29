@@ -1,10 +1,6 @@
-use crate::{
-    datetime_to_timestamp, error,
-    error::{SerdeError, *},
-    SpotifyToken, SPOTIFY_TOKEN_URL,
-};
+use crate::{error, error::*};
 use snafu::ResultExt;
-use std::{collections::HashMap, str::FromStr, string::ToString};
+use std::{str::FromStr, string::ToString};
 use url::Url;
 
 /// The Spotify Callback URL
@@ -117,72 +113,6 @@ impl SpotifyCallback {
     /// ```
     pub fn new(code: Option<String>, error: Option<String>, state: String) -> Self {
         Self { code, error, state }
-    }
-
-    /// Converts the Spotify Callback object into a Spotify Token object.
-    ///
-    /// # Example
-    ///
-    /// ```no_run
-    /// # use spotify_oauth::{SpotifyAuth, SpotifyCallback, SpotifyScope};
-    /// # use std::str::FromStr;
-    /// # #[async_std::main]
-    /// # async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>> {
-    /// // Create a new Spotify auth object.
-    /// let auth = SpotifyAuth::new("00000000000".into(), "secret".into(), "code".into(), "http://localhost:8000/callback".into(), vec![SpotifyScope::Streaming], false);
-    ///
-    /// // Create a new spotify callback object using the callback url given by the authorization process and convert it into a token.
-    /// let token = SpotifyCallback::from_str("https://example.com/callback?code=NApCCgBkWtQ&state=test").unwrap()
-    ///     .convert_into_token(auth.client_id, auth.client_secret, auth.redirect_uri).await.unwrap();
-    /// # Ok(()) }
-    /// ```
-    pub async fn convert_into_token(
-        self,
-        client_id: String,
-        client_secret: String,
-        redirect_uri: Url,
-    ) -> SpotifyResult<SpotifyToken> {
-        let mut payload: HashMap<String, String> = HashMap::new();
-        payload.insert("grant_type".to_owned(), "authorization_code".to_owned());
-        payload.insert(
-            "code".to_owned(),
-            match self.code {
-                None => {
-                    return Err(SpotifyError::TokenFailure {
-                        context: "Spotify callback code failed to parse.",
-                    })
-                }
-                Some(x) => x,
-            },
-        );
-        payload.insert("redirect_uri".to_owned(), redirect_uri.to_string());
-
-        // Form authorisation header.
-        let auth_value = base64::encode(&format!("{}:{}", client_id, client_secret));
-
-        // POST the request.
-        let mut response = surf::post(SPOTIFY_TOKEN_URL)
-            .header("Authorization", format!("Basic {}", auth_value))
-            .body(surf::Body::from_form(&payload).unwrap())
-            .send()
-            .await
-            .map_err(|err| SpotifyError::SurfError {
-                context: format!("{err:?}"),
-            })?;
-
-        // Read the response body.
-        let buf = response.body_string().await.unwrap();
-
-        if response.status().is_success() {
-            let mut token: SpotifyToken = serde_json::from_str(&buf).context(SerdeError)?;
-            token.expires_at = Some(datetime_to_timestamp(token.expires_in));
-
-            return Ok(token);
-        }
-
-        Err(SpotifyError::TokenFailure {
-            context: "Failed to convert callback into token",
-        })
     }
 }
 
