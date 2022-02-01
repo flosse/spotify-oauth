@@ -15,9 +15,8 @@ exclude = [
     ".env",
 ]
 
-[lib]
-name = "spotify_oauth"
-path = "src/lib.rs"
+[patch.crates-io]
+spotify-oauth = { path = "." }
 
 [dependencies]
 anyhow = "1"
@@ -39,6 +38,7 @@ default = []
 surf-client = ["surf"]
 
 [dev-dependencies]
+spotify-oauth = { version = "*", features = ["surf-client"] }
 async-std = { version = "1", features = ["attributes"] }
 dotenv = "0.15"
 open = "2"

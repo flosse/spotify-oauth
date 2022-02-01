@@ -49,8 +49,6 @@ mod callback;
 mod error;
 mod fetch;
 mod scope;
-#[cfg(feature = "surf")]
-mod surf;
 mod token;
 mod util;
 
@@ -58,7 +56,10 @@ use crate::error::*;
 
 pub use crate::{app_client::*, auth::*, callback::*, fetch::*, scope::*, token::*, util::*};
 
-#[cfg(feature = "surf")]
-pub use crate::surf::*;
-
 const SPOTIFY_AUTH_URL: &str = "https://accounts.spotify.com/authorize";
+
+#[cfg(feature = "surf-client")]
+mod surf;
+
+#[cfg(feature = "surf-client")]
+pub use crate::surf::*;
