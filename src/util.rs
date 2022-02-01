@@ -1,4 +1,7 @@
+#[cfg(not(feature = "wasm"))]
 use std::time::{SystemTime, UNIX_EPOCH};
+#[cfg(feature = "wasm")]
+use wasm_timer::{SystemTime, UNIX_EPOCH};
 
 use rand::{self, Rng};
 
