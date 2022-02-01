@@ -15,13 +15,13 @@
 //!     // Setup Spotify Auth URL
 //!     let auth = SpotifyAuth {
 //!         response_type : "code".to_string(),
-//!         scope : vec![SpotifyScope::Streaming],
+//!         scopes : vec![SpotifyScope::Streaming],
 //!         show_dialog : false,
 //!         app_client : AppClient {
 //!           id: "YOUR_SPOTIFY_CLIENT_ID".to_string(),
 //!           secret : "YOUR_SPOTIFY_CLIENT_SECRET".to_string(),
 //!         },
-//!         redirect_uri : Url::parse("http://localhost:8080/callback").unwrap(),
+//!         redirect_uri : Url::parse("http://localhost:8080/callback").unwrap().to_string(),
 //!         state : "-use-a-radom-string-".to_string()
 //!     };
 //!     let auth_url = auth.authorize_url()?;

@@ -14,7 +14,10 @@ use crate::{error::*, AppClient, HttpClient, SpotifyCallback, SpotifyToken, Toke
 /// let timestamp = datetime_to_timestamp(3600);
 /// ```
 pub fn datetime_to_timestamp(elapsed_seconds: u32) -> i64 {
-    let seconds_since_unix_epoch = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs();
+    let seconds_since_unix_epoch = SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .unwrap()
+        .as_secs();
     debug_assert!(seconds_since_unix_epoch < i64::MAX as u64);
     seconds_since_unix_epoch as i64 + i64::from(elapsed_seconds)
 }
