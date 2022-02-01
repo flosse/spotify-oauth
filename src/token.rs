@@ -8,22 +8,6 @@ use std::str::FromStr;
 /// This struct follows the parameters given at [this](https://developer.spotify.com/documentation/general/guides/authorization-guide/ "Spotify Auth Documentation") link.
 ///
 /// This object can only be formed from a correct Spotify Callback object.
-///
-/// # Example
-///
-/// ```no_run
-/// # use spotify_oauth::{convert_callback_into_token, SpotifyAuth, SpotifyScope, SpotifyCallback};
-/// # use std::str::FromStr;
-/// # #[async_std::main]
-/// # async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>> {
-/// // Create a new Spotify auth object.
-/// let auth = SpotifyAuth::new("00000000000".into(), "secret".into(), "code".into(), "http://localhost:8000/callback".into(), vec![SpotifyScope::Streaming], false);   
-///
-/// // Create a new Spotify token object using the callback object given by the authorization process.
-/// let callback = SpotifyCallback::from_str("https://example.com/callback?code=NApCCgBkWtQ&state=test").unwrap();
-/// convert_callback_into_token(callback, auth.client_id, auth.client_secret, auth.redirect_uri).await.unwrap();
-/// # Ok(()) }
-/// ```
 #[derive(Serialize, Deserialize, Debug, PartialEq)]
 pub struct SpotifyToken {
     /// An access token that can be provided in subsequent calls, for example to Spotify Web API services.
