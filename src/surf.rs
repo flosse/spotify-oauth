@@ -1,21 +1,32 @@
-use crate::{error::*, HttpClient, TokenRequest};
+use crate::{HttpClient, HttpClientError, TokenRequest};
 use async_trait::async_trait;
 use serde::Deserialize;
 use serde_json::Value;
-use snafu::ResultExt;
 use std::collections::HashMap;
 use surf::Body;
 
 pub struct SurfClient;
 
 #[derive(Deserialize)]
-struct Error {
+struct FetchTokenError {
     error: String,
+}
+
+impl From<surf::Error> for HttpClientError {
+    fn from(from: surf::Error) -> Self {
+        let status_code = from.status().into();
+        let source = from.into_inner();
+        Self {
+            source,
+            status_code: Some(status_code),
+        }
+    }
 }
 
 #[async_trait]
 impl<'t> HttpClient<'t> for SurfClient {
     type Error = surf::Error;
+
     async fn fetch_token(&self, auth_request: TokenRequest<'t>) -> Result<Value, Self::Error> {
         // POST the request.
         let mut request = surf::post(auth_request.url());
@@ -27,13 +38,13 @@ impl<'t> HttpClient<'t> for SurfClient {
         let mut response = request.send().await?;
         let json_string = response.body_string().await?;
         if !response.status().is_success() {
-            let err: Error = serde_json::from_str(&json_string).context(SerdeError)?;
+            let err: FetchTokenError = serde_json::from_str(&json_string)?;
             return Err(surf::Error::new(
                 response.status(),
                 anyhow::anyhow!("Failed to fetch token: {}", err.error),
             ));
         }
-        let value = serde_json::from_str(&json_string).context(SerdeError)?;
+        let value = serde_json::from_str(&json_string)?;
         Ok(value)
     }
 }

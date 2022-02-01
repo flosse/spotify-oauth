@@ -1,11 +1,41 @@
-use crate::AppClient;
+use std::{borrow::Cow, fmt};
+
 use async_trait::async_trait;
 use serde_json::Value;
-use std::{borrow::Cow, fmt::Display};
+use thiserror::Error;
+
+use crate::AppClient;
+
+#[derive(Debug, Error)]
+pub struct HttpClientError {
+    pub source: anyhow::Error,
+
+    /// Response status code (if available)
+    pub status_code: Option<u16>,
+}
+
+impl fmt::Display for HttpClientError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let Self {
+            source,
+            status_code,
+        } = self;
+        if let Some(status_code) = status_code {
+            write!(
+                f,
+                "HTTP client request failed with status {}: {}",
+                status_code, source
+            )
+        } else {
+            write!(f, "HTTP client request failed: {}", source)
+        }
+    }
+}
 
 #[async_trait]
 pub trait HttpClient<'t> {
-    type Error: Display;
+    type Error: Into<HttpClientError>;
+
     async fn fetch_token(&self, request: TokenRequest<'t>) -> Result<Value, Self::Error>;
 }
 

@@ -1,30 +1,26 @@
 //! Error Type for the API.
 
-use snafu::Snafu;
+use thiserror::Error;
+
+use crate::fetch::HttpClientError;
 
 /// Generic Result for the Library
 pub type SpotifyResult<T, E = SpotifyError> = Result<T, E>;
 
-#[derive(Debug, Snafu)]
-#[snafu(visibility = "pub(crate)")]
+#[derive(Debug, Error)]
 pub enum SpotifyError {
-    #[snafu(display("Unable to parse JSON: {}", source))]
-    SerdeError { source: serde_json::Error },
+    #[error(transparent)]
+    SerdeJson(#[from] serde_json::Error),
 
-    #[snafu(display("Unable to parse URL: {}", source))]
-    UrlError { source: url::ParseError },
+    #[error(transparent)]
+    ParseUrl(#[from] url::ParseError),
 
-    #[snafu(display("Token parsing failure: {}", context))]
+    #[error(transparent)]
+    HttpClient(#[from] HttpClientError),
+
+    #[error("Token parsing failure: {}", context)]
     TokenFailure { context: &'static str },
 
-    #[snafu(display("Callback URL parsing failure: {}", context))]
+    #[error("Callback URL parsing failure: {}", context)]
     CallbackFailure { context: &'static str },
-
-    #[snafu(display("Surf http failure: {}", context))]
-    SurfError {
-        // NOTE:
-        // 'source: Box<dyn error::Error + Send + Sync>'
-        // does not work with surf v2.x anymore.
-        context: String,
-    },
 }

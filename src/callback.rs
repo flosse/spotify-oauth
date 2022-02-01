@@ -1,7 +1,8 @@
-use crate::{error, error::*};
-use snafu::ResultExt;
 use std::{str::FromStr, string::ToString};
+
 use url::Url;
+
+use crate::error::SpotifyError;
 
 /// The Spotify Callback URL
 ///
@@ -43,10 +44,10 @@ pub struct SpotifyCallback {
 /// # assert_eq!(callback, SpotifyCallback::new(Some("NApCCgBkWtQ".to_string()), None, String::from("test")));
 /// ```
 impl FromStr for SpotifyCallback {
-    type Err = error::SpotifyError;
+    type Err = SpotifyError;
 
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let url = Url::parse(s).context(UrlError)?;
+    fn from_str(url: &str) -> Result<Self, Self::Err> {
+        let url = Url::parse(url)?;
         let parsed: Vec<(String, String)> = url
             .query_pairs()
             .map(|x| (x.0.into_owned(), x.1.into_owned()))

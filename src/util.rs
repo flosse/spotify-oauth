@@ -1,8 +1,8 @@
 use std::time::{SystemTime, UNIX_EPOCH};
-use crate::{error::*, AppClient, HttpClient, SpotifyCallback, SpotifyToken, TokenRequest};
+
 use rand::{self, Rng};
-use snafu::ResultExt;
-use url::Url;
+
+use crate::{error::*, AppClient, HttpClient, SpotifyCallback, SpotifyToken, TokenRequest};
 
 /// Convert date and time to a unix timestamp.
 ///
@@ -39,14 +39,14 @@ pub fn generate_random_string(length: usize) -> String {
 }
 
 /// Converts the Spotify Callback object into a Spotify Token object.
-pub async fn convert_callback_into_token<'t, C>(
+pub async fn convert_callback_into_token<'c, C>(
     http: C,
     callback: SpotifyCallback,
     client_id: &AppClient,
-    redirect_uri: Url,
+    redirect_uri: String,
 ) -> SpotifyResult<SpotifyToken>
 where
-    C: HttpClient<'t>,
+    C: HttpClient<'c>,
 {
     let code = match callback.code {
         None => {
@@ -57,14 +57,9 @@ where
         Some(x) => x,
     };
 
-    let auth_request = TokenRequest::new(client_id, code, redirect_uri.to_string());
-    let buf = http
-        .fetch_token(auth_request)
-        .await
-        .map_err(|err| SpotifyError::SurfError {
-            context: format!("{}", err),
-        })?;
-    let mut token: SpotifyToken = serde_json::from_value(buf).context(SerdeError)?;
+    let auth_request = TokenRequest::new(client_id, code, redirect_uri);
+    let buf = http.fetch_token(auth_request).await.map_err(Into::into)?;
+    let mut token: SpotifyToken = serde_json::from_value(buf)?;
     token.expires_at = Some(datetime_to_timestamp(token.expires_in));
 
     Ok(token)
