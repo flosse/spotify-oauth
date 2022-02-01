@@ -23,7 +23,7 @@ impl From<surf::Error> for HttpClientError {
     }
 }
 
-#[async_trait]
+#[async_trait(?Send)]
 impl<'t> HttpClient<'t> for SurfClient {
     type Error = surf::Error;
 

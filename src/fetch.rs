@@ -32,7 +32,7 @@ impl fmt::Display for HttpClientError {
     }
 }
 
-#[async_trait]
+#[async_trait(?Send)]
 pub trait HttpClient<'t> {
     type Error: Into<HttpClientError>;
 
