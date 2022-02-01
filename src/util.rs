@@ -1,5 +1,5 @@
+use std::time::{SystemTime, UNIX_EPOCH};
 use crate::{error::*, AppClient, HttpClient, SpotifyCallback, SpotifyToken, TokenRequest};
-use chrono::{DateTime, Utc};
 use rand::{self, Rng};
 use snafu::ResultExt;
 use url::Url;
@@ -13,9 +13,10 @@ use url::Url;
 /// # use spotify_oauth::datetime_to_timestamp;
 /// let timestamp = datetime_to_timestamp(3600);
 /// ```
-pub fn datetime_to_timestamp(elapsed: u32) -> i64 {
-    let utc: DateTime<Utc> = Utc::now();
-    utc.timestamp() + i64::from(elapsed)
+pub fn datetime_to_timestamp(elapsed_seconds: u32) -> i64 {
+    let seconds_since_unix_epoch = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs();
+    debug_assert!(seconds_since_unix_epoch < i64::MAX as u64);
+    seconds_since_unix_epoch as i64 + i64::from(elapsed_seconds)
 }
 
 /// Generate a random alphanumeric string with a given length.
